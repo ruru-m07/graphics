@@ -16,9 +16,9 @@ export default function InteractiveLine({
   end: endPoint,
   setEnd: setEndPoint,
 }: InteractiveLineProps) {
-  const [isDragging, setIsDragging] = useState<'start' | 'end' | number | null>(
+  const [isDragging, setIsDragging] = useState<'start' | 'end' | string | null>(
     null
-  ); // number = color index
+  );
   const [dragOffset, setDragOffset] = useState<Point>({ x: 0, y: 0 });
   const svgRef = useRef<SVGSVGElement>(null);
 
@@ -64,7 +64,7 @@ export default function InteractiveLine({
         setStartPoint({ x: mouseX, y: mouseY });
       } else if (isDragging === 'end') {
         setEndPoint({ x: mouseX, y: mouseY });
-      } else if (typeof isDragging === 'number') {
+      } else if (typeof isDragging === 'string') {
         // dragging a mid color stop
         const relX = e.clientX - rect.left - startPoint.x;
         const relY = e.clientY - rect.top - startPoint.y;
@@ -147,8 +147,7 @@ export default function InteractiveLine({
       </g>
 
       {/* Color stops (draggable along line only) */}
-      {/* Color stops (draggable along line only) */}
-      {colors.map((color, index) => {
+      {colors.map((color) => {
         const dx = endPoint.x - startPoint.x;
         const dy = endPoint.y - startPoint.y;
         const t = (color.offset ?? 0) / 100;
@@ -158,25 +157,27 @@ export default function InteractiveLine({
         return (
           <g
             className="cursor-grab active:cursor-grabbing"
-            key={index}
+            key={color.id}
             onMouseDown={(e) => {
               e.preventDefault();
-              // 🚨 Only start drag if none is active
-              if (isDragging !== index) {
-                setIsDragging(index);
+              // Only start drag if none is active
+              if (isDragging !== color.id) {
+                setIsDragging(color.id);
               }
             }}
             style={{
-              zIndex: isDragging === index ? 1000 : 'auto',
+              zIndex: isDragging === color.id ? 1000 : 'auto',
               pointerEvents:
-                isDragging === null || isDragging === index ? 'auto' : 'none',
+                isDragging === null || isDragging === color.id
+                  ? 'auto'
+                  : 'none',
             }}
           >
             <circle
               cx={x}
-              cy={isDragging === index ? y - 100 : y}
+              cy={y}
               fill={`rgba(${color.color[0]}, ${color.color[1]}, ${color.color[2]}, ${color.color[3]})`}
-              r="8"
+              r={isDragging === color.id ? '9' : '8'}
               stroke="#ffffff"
               strokeWidth="2"
             />

@@ -58,8 +58,8 @@ const RightSideBar = ({
         <canvas className="mb-4 h-10 w-full rounded-md" ref={canvasRef} />
         {colors
           .sort((a, b) => a.offset - b.offset)
-          .map((_, i) => (
-            <ColorBox index={i} key={i} />
+          .map((color) => (
+            <ColorBox id={color.id} key={color.id} />
           ))}
         <Button
           className="mt-2 w-full"
@@ -118,9 +118,13 @@ const RightSideBar = ({
 
 export default RightSideBar;
 
-const ColorBox = ({ index }: { index: number }) => {
+const ColorBox = ({ id }: { id: string }) => {
   const { colors, updateColor, updateOffset, removeColor } = useColorStore();
-  const current = colors[index];
+  const current = colors.find((color) => color.id === id);
+
+  if (!current) {
+    return null;
+  }
 
   const [r, g, b, a] = current.color;
   const hex = Color.rgb(r, g, b).hex();
@@ -137,7 +141,7 @@ const ColorBox = ({ index }: { index: number }) => {
         <PopoverContent className="w-fit space-y-4 p-4">
           <CustomColorPicker
             color={[r, g, b, a]}
-            onChange={(newColor) => updateColor(index, newColor)}
+            onChange={(newColor) => updateColor(id, newColor)}
           />
         </PopoverContent>
       </Popover>
@@ -147,7 +151,7 @@ const ColorBox = ({ index }: { index: number }) => {
         onChange={(e) => {
           try {
             const c = Color(e.target.value).rgb().array();
-            updateColor(index, [c[0], c[1], c[2], a]);
+            updateColor(id, [c[0], c[1], c[2], a]);
           } catch {
             // invalid hex, ignore
           }
@@ -161,7 +165,7 @@ const ColorBox = ({ index }: { index: number }) => {
         onChange={(e) => {
           const value = Number.parseFloat(e.target.value);
           if (!Number.isNaN(value)) {
-            updateOffset(index, value);
+            updateOffset(id, value);
           }
         }}
         type="number"
@@ -169,7 +173,7 @@ const ColorBox = ({ index }: { index: number }) => {
       />
       <Button
         onClick={() => {
-          removeColor(index);
+          removeColor(id);
         }}
         size={'sm'}
         variant={'ghost'}
