@@ -55,6 +55,7 @@ export default function InteractiveLine({
     const dx = endPoint.x - startPoint.x;
     const dy = endPoint.y - startPoint.y;
     const lineLength = Math.sqrt(dx * dx + dy * dy);
+    const denom = lineLength * lineLength || 1; // ? avoid division-by-zero when lineLength
 
     const handleMouseMove = (e: MouseEvent) => {
       const mouseX = e.clientX - rect.left - dragOffset.x;
@@ -70,7 +71,7 @@ export default function InteractiveLine({
         const relY = e.clientY - rect.top - startPoint.y;
 
         // project mouse onto line
-        const dot = (relX * dx + relY * dy) / (lineLength * lineLength);
+        const dot = (relX * dx + relY * dy) / denom;
         const clampedT = Math.max(0, Math.min(1, dot));
 
         updateOffset(isDragging, clampedT * 100);

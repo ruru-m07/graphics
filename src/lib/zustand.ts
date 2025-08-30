@@ -24,9 +24,20 @@ export const useColorStore = create<ColorStore>((set) => ({
   ],
 
   addColor: (color, offset) =>
-    set((state) => ({
-      colors: [...state.colors, { id: Date.now().toString(), color, offset }],
-    })),
+    set((state) => {
+      // ? Clamp offset into [0, 100]
+      const clamped = Math.max(0, Math.min(100, offset));
+
+      // ! Use a stable UUID if available, otherwise fall back to timestamp+random
+      const id =
+        globalThis.crypto?.randomUUID?.() ??
+        `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+      const colors = [...state.colors, { id, color, offset: clamped }].sort(
+        (a, b) => a.offset - b.offset
+      );
+      return { colors };
+    }),
 
   updateColor: (id, newColor) =>
     set((state) => {
@@ -38,8 +49,10 @@ export const useColorStore = create<ColorStore>((set) => ({
 
   updateOffset: (id, newOffset) =>
     set((state) => {
+      const clamped = Math.max(0, Math.min(100, newOffset));
+
       const updated = state.colors.map((color) =>
-        color.id === id ? { ...color, offset: newOffset } : color
+        color.id === id ? { ...color, offset: clamped } : color
       );
       return { colors: updated };
     }),

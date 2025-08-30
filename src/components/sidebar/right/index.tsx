@@ -41,7 +41,8 @@ const RightSideBar = ({
 
     const gradient = ctx.createLinearGradient(0, 0, rect.width, 0);
 
-    for (const stop of colors) {
+    const stops = [...colors].sort((a, b) => a.offset - b.offset);
+    for (const stop of stops) {
       const [r, g, b, a] = stop.color;
       gradient.addColorStop(stop.offset / 100, `rgba(${r}, ${g}, ${b}, ${a})`);
     }
@@ -56,7 +57,7 @@ const RightSideBar = ({
       <div className="flex-1 overflow-auto rounded-2xl bg-secondary p-4">
         <Label className="mb-4">Linear Gradient</Label>
         <canvas className="mb-4 h-10 w-full rounded-md" ref={canvasRef} />
-        {colors
+        {[...colors]
           .sort((a, b) => a.offset - b.offset)
           .map((color) => (
             <ColorBox id={color.id} key={color.id} />
@@ -71,8 +72,6 @@ const RightSideBar = ({
              * if there is only one item in colors.
              * new stop will be 0%
              */
-            // const last = colors[colors.length - 1];
-            // const secondLast = colors[colors.length - 2];
             const last = colors.at(-1);
             const secondLast = colors.at(-2);
 
@@ -87,10 +86,10 @@ const RightSideBar = ({
             }
 
             if (secondLast) {
-              // Find midpoint offset
+              // ! Find midpoint offset
               const newOffset = (last.offset + secondLast.offset) / 2;
 
-              // Blend RGBA values
+              // ? Blend RGBA values
               const [r1, g1, b1, a1] = secondLast.color;
               const [r2, g2, b2, a2] = last.color;
 
@@ -98,13 +97,46 @@ const RightSideBar = ({
                 Math.round((r1 + r2) / 2),
                 Math.round((g1 + g2) / 2),
                 Math.round((b1 + b2) / 2),
-                (a1 + a2) / 2, // alpha doesn’t need rounding
+                (a1 + a2) / 2,
               ];
 
               addColor(newColor, newOffset);
             } else {
-              // If there is only one color stop, add the new stop at 0%
+              // ? If there is only one color stop, add the new stop at 0%
               addColor([...colors[0].color], 0);
+
+              const sorted = [...colors].sort((a, b) => a.offset - b.offset);
+
+              // ? No stops: default to white at 0%
+              if (sorted.length === 0) {
+                addColor([255, 255, 255, 1], 0);
+                return;
+              }
+
+              // ? One stop: duplicate it, clamped to [0,100]
+              if (sorted.length === 1) {
+                const only = sorted[0];
+                const offset = Math.max(0, Math.min(100, only.offset));
+                addColor([...only.color], offset);
+                return;
+              }
+
+              // ? Two or more: blend the last two stops
+              // biome-ignore lint/style/noNonNullAssertion: fine!
+              const aStop = sorted.at(-2)!;
+              // biome-ignore lint/style/noNonNullAssertion: fine!
+              const bStop = sorted.at(-1)!;
+              const midOffset = (aStop.offset + bStop.offset) / 2;
+              const newOffset = Math.max(0, Math.min(100, midOffset));
+              const [r1, g1, b1, a1] = aStop.color;
+              const [r2, g2, b2, a2] = bStop.color;
+              const newColor: [number, number, number, number] = [
+                Math.round((r1 + r2) / 2),
+                Math.round((g1 + g2) / 2),
+                Math.round((b1 + b2) / 2),
+                (a1 + a2) / 2,
+              ];
+              addColor(newColor, newOffset);
             }
           }}
         >
@@ -165,7 +197,8 @@ const ColorBox = ({ id }: { id: string }) => {
         onChange={(e) => {
           const value = Number.parseFloat(e.target.value);
           if (!Number.isNaN(value)) {
-            updateOffset(id, value);
+            const clamped = Math.max(0, Math.min(100, value));
+            updateOffset(id, clamped);
           }
         }}
         type="number"

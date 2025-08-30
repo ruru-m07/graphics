@@ -27,6 +27,9 @@ const Export = ({
         <CopyButton onCopyAsPNG={onCopyAsPNG} />
         <Button
           className="bg-secondary/20 text-secondary hover:bg-secondary/25"
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
           size={'icon'}
           variant={'secondary'}
         >
