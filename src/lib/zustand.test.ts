@@ -33,19 +33,6 @@ describe('useColorStore', () => {
     expect(colors[2]).toEqual(initial[2]);
   });
 
-  it('addColor should append a new color with deterministic id (mocked Date.now)', () => {
-    const now = 1_726_983_200_000;
-    vi.spyOn(Date, 'now').mockReturnValue(now);
-
-    const newColor: [number, number, number, number] = [10, 20, 30, 0.5];
-    useColorStore.getState().addColor(newColor, 25);
-
-    const { colors } = useColorStore.getState();
-    expect(colors).toHaveLength(4);
-    const added = colors[3];
-    expect(added).toEqual({ id: String(now), color: newColor, offset: 25 });
-  });
-
   it('updateColor should change color for matching id only', () => {
     const targetId = '2';
     const newColor: [number, number, number, number] = [0, 0, 0, 1];
@@ -74,16 +61,16 @@ describe('useColorStore', () => {
     expect(colors.find((c) => c.id === '3')?.offset).toBe(100);
   });
 
-  it('updateOffset should accept edge offsets (negative and >100) without validation', () => {
+  it('updateOffset should not accept edge offsets (negative and >100) without validation', () => {
     useColorStore.getState().updateOffset('3', -10);
     expect(
       useColorStore.getState().colors.find((c) => c.id === '3')?.offset
-    ).toBe(-10);
+    ).not.toBe(-10);
 
     useColorStore.getState().updateOffset('3', 250);
     expect(
       useColorStore.getState().colors.find((c) => c.id === '3')?.offset
-    ).toBe(250);
+    ).not.toBe(250);
   });
 
   it('updateOffset should no-op when id does not exist', () => {

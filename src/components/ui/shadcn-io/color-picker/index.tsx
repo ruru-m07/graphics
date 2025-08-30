@@ -1,7 +1,7 @@
 import { RgbColorPicker } from 'react-colorful';
 import { Slider } from '@/components/ui/slider';
 
-type RGBA = [number, number, number, number];
+import type { RGBA } from '@/lib/zustand';
 
 export const CustomColorPicker = ({
   color,
