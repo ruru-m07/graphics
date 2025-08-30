@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import LeftSideBar from './components/sidebar/left';
 import RightSideBar from './components/sidebar/right';
-import InteractiveLine from './InteractiveLine';
+import InteractiveLine from './interactive-line';
 import { cn } from './lib/utils';
 import { useColorStore } from './lib/zustand';
 

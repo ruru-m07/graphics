@@ -12,7 +12,8 @@
         "noArrayIndexKey": "off"
       },
       "performance": {
-        "noImgElement": "off"
+        "noImgElement": "off",
+        "noNamespaceImport": "off"
       },
       "style": {
         "noMagicNumbers": "off"
