@@ -2,13 +2,13 @@ import { create } from 'zustand';
 
 export type RGBA = [number, number, number, number];
 
-type ColorStop = {
+export type ColorStop = {
   id: string;
   color: RGBA;
   offset: number;
 };
 
-type ColorStore = {
+export type ColorStore = {
   colors: ColorStop[];
   addColor: (color: RGBA, offset: number) => void;
   updateColor: (id: string, newColor: RGBA) => void;
